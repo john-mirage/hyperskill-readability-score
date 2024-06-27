@@ -8,21 +8,46 @@ public class Main {
     public static void main(String[] args) {
         try {
             String file = readFileAsString(args[0]);
+            System.out.println("The text is:");
+            System.out.println(file);
             Text text = new Text(file);
-            System.out.println("Words: " + text.getWordCount());
-            System.out.println("Sentences: " + text.getSentenceCount());
-            System.out.println("Characters: " + text.getCharacterCount());
-            System.out.println("Syllables: " + text.getSyllableCount());
-            System.out.println("Polysyllables: " + text.getPolysyllableCount());
-            System.out.println("Enter the score you want to calculate (ARI, FK, SMOG, CL, all): all");
             System.out.println();
-            System.out.printf("Automated Readability Index: %.2f (about %d-year-olds).\n", text.getAriScore(), text.getAriAge());
-            System.out.printf("Flesch–Kincaid readability tests: %.2f (about %d-year-olds).\n", text.getFkScore(), text.getFkAge());
-            System.out.printf("Simple Measure of Gobbledygook: %.2f (about %d-year-olds).\n", text.getSmogScore(), text.getSmogAge());
-            System.out.printf("Coleman–Liau index: %.2f (about %d-year-olds).\n", text.getClScore(), text.getClAge());
+            System.out.println(text);
             System.out.println();
-            System.out.printf("This text should be understood in average by %.2f-year-olds.\n", text.getAgeAverage());
-        } catch (IOException | IllegalStateException e) {
+            String scoreToCalculate = UserInterface.askForScoreToCalculate();
+            System.out.println();
+            switch (scoreToCalculate) {
+                case "ARI":
+                    System.out.println(new AriScore(text));
+                    break;
+                case "FK":
+                    System.out.println(new FkScore(text));
+                    break;
+                case "SMOG":
+                    System.out.println(new SmogScore(text));
+                    break;
+                case "CL":
+                    System.out.println(new ClScore(text));
+                    break;
+                case "all":
+                    Score[] scores = new Score[] {
+                            new AriScore(text),
+                            new FkScore(text),
+                            new SmogScore(text),
+                            new ClScore(text)
+                    };
+                    int totalAge = 0;
+                    for (Score score : scores) {
+                        totalAge += score.getAge();
+                        System.out.println(score);
+                    }
+                    System.out.println();
+                    System.out.printf("This text should be understood in average by %.2f-year-olds.\n", totalAge / 4.0);
+                    break;
+                default:
+                    throw new ScoreException("Invalid score value");
+            }
+        } catch (IOException e) {
             System.out.println(e.getMessage());
         }
     }
